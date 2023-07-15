@@ -1,0 +1,19 @@
+load("@pip//:requirements.bzl", "requirement")
+
+filegroup(
+    name = "data",
+    srcs = glob(["*.ipynb"]),
+)
+
+py_binary(
+    name = "notebook",
+    srcs = ["launcher.py"],
+    data = [":data"],
+    main = "launcher.py",
+    deps = [
+        requirement("notebook"),
+        requirement("pycryptodomex"),
+        "@pycrate",
+    ],
+)
+

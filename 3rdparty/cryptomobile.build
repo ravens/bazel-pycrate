@@ -1,0 +1,46 @@
+genrule(
+    name = "py_build_helper_generator",
+    outs = ["py_build_helper.py"],
+    cmd = """
+echo "import runpy" > $@ && \
+echo "import sys" >> $@ && \
+echo "import os" >> $@ && \
+echo "os.environ['CC'] = 'gcc'" >> $@ && \
+echo "os.chdir('./external/cryptomobile')" >> $@ && \
+echo "sys.argv = ['', 'build' ]" >> $@ && \
+echo "runpy.run_path('setup.py', run_name='__main__')" >> $@
+""")
+
+py_binary(
+    name = "py_build_helper",
+    srcs = ["py_build_helper.py"],
+)
+
+genrule(
+    name = "compile_cryptomobile",
+    srcs = glob(["**/*"]),
+    exec_tools = [":py_build_helper"],
+    output_to_bindir = True,
+    cmd = " && ".join([
+    "$(location :py_build_helper)",
+    "cp external/cryptomobile/build/lib*/pykasumi*.so $(location pykasumi.so)",
+    "cp external/cryptomobile/build/lib*/pysnow*.so $(location pysnow.so)",
+    "cp external/cryptomobile/build/lib*/pyzuc*.so $(location pyzuc.so)",
+    "cp external/cryptomobile/build/lib*/pykeccakp1600*.so $(location pykeccakp1600.so)",
+    "cp external/cryptomobile/build/lib*/pycomp128*.so $(location pycomp128.so)",
+     ]),
+    outs = [
+        "pykasumi.so",
+        "pysnow.so",
+        "pyzuc.so",
+        "pykeccakp1600.so",
+        "pycomp128.so",
+    ],
+)
+
+py_library(
+    name = "cryptomobile",
+    srcs = glob(["**/*.py"]),
+    data =  [":compile_cryptomobile"],
+    visibility = ["//visibility:public"],
+)

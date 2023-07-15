@@ -1,0 +1,9 @@
+load("@pip//:requirements.bzl", "requirement")
+
+py_library(
+    name = "pycrate",
+    srcs = glob([ "**/*.py" ]),
+    imports = [ "pycrate" ],
+    deps = [ requirement("pycryptodomex"), "@cryptomobile", requirement("setuptools") ],
+    visibility = [ "//visibility:public" ],
+)
